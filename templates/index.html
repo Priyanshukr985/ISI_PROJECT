@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YourStatGuide • AI Statistics Companion</title>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--primary:#1e40af;
+--accent:#3b82f6;
+--bg-dark:#0f172a;
+--card:rgba(255,255,255,0.08);
+--border:rgba(255,255,255,0.15);
+--muted:#cbd5e1;
+--shadow:0 10px 40px rgba(0,0,0,0.3);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,sans-serif}
+
+body{
+height:100vh;
+display:flex;
+color:white;
+background:
+radial-gradient(circle at 20% 30%, rgba(59,130,246,0.25) 0%, transparent 40%),
+radial-gradient(circle at 80% 70%, rgba(30,64,175,0.3) 0%, transparent 40%),
+linear-gradient(135deg,#0f172a,#1e293b);
+overflow:hidden;
+}
+
+/* subtle math watermark */
+body::before{
+content:"μ  σ  ∑  ∫  π  λ  P(X)  E(X)  Var(X)  CLT  MLE  H₀  H₁";
+position:absolute;
+font-size:120px;
+color:rgba(255,255,255,0.03);
+top:20%;
+left:10%;
+white-space:nowrap;
+transform:rotate(-15deg);
+pointer-events:none;
+}
+
+/* Sidebar */
+.sidebar{
+width:260px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(20px);
+padding:30px 20px;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+border-right:1px solid var(--border);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom:40px;
+}
+
+.logo{
+width:44px;height:44px;
+background:linear-gradient(135deg,var(--primary),var(--accent));
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:800;
+}
+
+.menu-item{
+padding:12px 14px;
+border-radius:12px;
+cursor:pointer;
+margin-bottom:8px;
+color:var(--muted);
+transition:.3s;
+}
+
+.menu-item:hover{
+background:rgba(59,130,246,0.15);
+color:white;
+}
+
+.menu-item.active{
+background:linear-gradient(90deg,var(--primary),var(--accent));
+color:white;
+font-weight:600;
+}
+
+/* Main */
+.main{
+flex:1;
+padding:40px;
+display:flex;
+flex-direction:column;
+position:relative;
+}
+
+.header{
+text-align:center;
+margin-bottom:30px;
+}
+
+.header h2{
+font-size:26px;
+font-weight:700;
+}
+
+.header p{
+color:var(--muted);
+margin-top:8px;
+}
+
+/* Services */
+.services{
+background:var(--card);
+backdrop-filter:blur(20px);
+border:1px solid var(--border);
+border-radius:20px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:var(--shadow);
+}
+
+.pills{
+display:flex;
+flex-wrap:wrap;
+gap:12px;
+margin-top:15px;
+}
+
+.pill{
+padding:10px 18px;
+border-radius:999px;
+background:rgba(255,255,255,0.1);
+cursor:pointer;
+font-size:13px;
+font-weight:600;
+transition:.3s;
+}
+
+.pill:hover{
+background:linear-gradient(90deg,var(--primary),var(--accent));
+}
+
+/* Chat */
+.chat-window{
+flex:1;
+background:rgba(255,255,255,0.05);
+border-radius:20px;
+padding:25px;
+overflow-y:auto;
+border:1px solid var(--border);
+backdrop-filter:blur(20px);
+box-shadow:var(--shadow);
+}
+
+.msg{
+max-width:75%;
+padding:14px 16px;
+border-radius:16px;
+margin-bottom:18px;
+font-size:14px;
+line-height:1.6;
+animation:fadeIn .3s ease-in;
+}
+
+.msg.user{
+background:linear-gradient(90deg,var(--primary),var(--accent));
+margin-left:auto;
+}
+
+.msg.bot{
+background:rgba(255,255,255,0.12);
+border:1px solid var(--border);
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+/* Input */
+.input-bar{
+position:fixed;
+bottom:25px;
+left:50%;
+transform:translateX(-50%);
+width:720px;
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(20px);
+border:1px solid var(--border);
+border-radius:999px;
+padding:12px 18px;
+display:flex;
+gap:12px;
+box-shadow:var(--shadow);
+}
+
+.input-bar input{
+flex:1;
+border:none;
+background:transparent;
+outline:none;
+color:white;
+font-size:15px;
+}
+
+.input-bar button{
+background:linear-gradient(90deg,var(--primary),var(--accent));
+color:white;
+border:none;
+padding:10px 24px;
+border-radius:999px;
+font-weight:600;
+cursor:pointer;
+transition:.3s;
+}
+
+.input-bar button:hover{
+opacity:.85;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<div>
+<div class="brand">
+<div class="logo">Σ</div>
+<h3>YourStatGuide</h3>
+</div>
+
+<div class="menu-item active">📘 Chapters</div>
+<div class="menu-item">📊 Concepts</div>
+<div class="menu-item">🧮 Practice</div>
+<div class="menu-item">📈 Visualizations</div>
+<div class="menu-item">📝 Notes</div>
+</div>
+
+<div style="font-size:13px;color:var(--muted)">
+AI Companion for Mathematical Statistics
+</div>
+</div>
+
+<div class="main">
+<div class="header">
+<h2>Welcome to YourStatGuide</h2>
+<p>Explore CLT, MLE, Sufficiency, Hypothesis Testing & more.</p>
+</div>
+
+<div class="services">
+<strong>Statistics Services</strong>
+<div class="pills">
+<div class="pill">Explain a Concept</div>
+<div class="pill">Solve a Problem</div>
+<div class="pill">Generate Practice Question</div>
+<div class="pill">Show Derivation</div>
+<div class="pill">Quick Revision</div>
+</div>
+</div>
+
+<div class="chat-window" id="chatWindow"></div>
+</div>
+
+<div class="input-bar">
+<input id="input" placeholder="Ask about Central Limit Theorem, MLE, etc...">
+<button onclick="send()">Ask</button>
+</div>
+
+<script>
+const chatWindow=document.getElementById("chatWindow");
+const input=document.getElementById("input");
+
+function append(role,text){
+const msg=document.createElement("div");
+msg.className="msg "+role;
+msg.innerHTML=marked.parse(text);
+chatWindow.appendChild(msg);
+chatWindow.scrollTop=chatWindow.scrollHeight;
+if(window.MathJax){MathJax.typesetPromise();}
+}
+
+async function send(){
+const text=input.value.trim();
+if(!text)return;
+
+append("user",text);
+input.value="";
+
+const thinking=document.createElement("div");
+thinking.className="msg bot";
+thinking.innerHTML="<em>Analyzing statistical context...</em>";
+chatWindow.appendChild(thinking);
+chatWindow.scrollTop=chatWindow.scrollHeight;
+
+try{
+const res=await fetch("/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:text})
+});
+const data=await res.json();
+thinking.remove();
+
+let i=0;
+const full=data.reply;
+const bot=document.createElement("div");
+bot.className="msg bot";
+chatWindow.appendChild(bot);
+
+function type(){
+bot.innerText=full.slice(0,i);
+chatWindow.scrollTop=chatWindow.scrollHeight;
+if(i<full.length){
+i++;
+setTimeout(type,15);
+}else{
+bot.innerHTML=marked.parse(full);
+if(window.MathJax){MathJax.typesetPromise();}
+}
+}
+type();
+
+}catch(e){
+thinking.remove();
+append("bot","**Error:** Backend not reachable.");
+}
+}
+
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter")send();
+});
+</script>
+
+</body>
+</html>

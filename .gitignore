@@ -1,0 +1,6 @@
+statenv/
+__pycache__/
+faiss_index/
+.env
+Stat_Book.pdf
+
