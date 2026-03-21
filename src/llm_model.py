@@ -12,5 +12,8 @@ class LLM_Loader:
         """Load Hugging Face embedding model wrapper for LangChain."""
         return ChatGroq(
             api_key=self.api_key,
-            model=self.model_name
+            model=self.model_name,
+           
+            temperature=0.7,
+            max_tokens=2048,
         )

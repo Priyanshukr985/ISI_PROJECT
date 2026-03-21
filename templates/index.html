@@ -3,292 +3,637 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YourStatGuide • AI Statistics Companion</title>
+<title>StatGPT</title>
 
+<script>
+window.MathJax = {
+tex: {
+inlineMath: [['\\(','\\)']],
+displayMath: [['$$','$$'], ['\\[','\\]']]
+},
+svg: {
+fontCache: 'global'
+}
+};
+</script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
---primary:#1e40af;
+--bg:#0b1120;
+--panel:rgba(15,23,42,0.78);
+--panel-soft:rgba(30,41,59,0.72);
+--border:rgba(148,163,184,0.18);
+--text:#e5eefc;
+--muted:#94a3b8;
 --accent:#3b82f6;
---bg-dark:#0f172a;
---card:rgba(255,255,255,0.08);
---border:rgba(255,255,255,0.15);
---muted:#cbd5e1;
---shadow:0 10px 40px rgba(0,0,0,0.3);
+--accent-strong:#2563eb;
+--shadow:0 20px 50px rgba(2,6,23,0.45);
 }
 
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,sans-serif}
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+font-family:Inter,sans-serif;
+}
 
 body{
-height:100vh;
-display:flex;
-color:white;
+min-height:100vh;
+color:var(--text);
 background:
-radial-gradient(circle at 20% 30%, rgba(59,130,246,0.25) 0%, transparent 40%),
-radial-gradient(circle at 80% 70%, rgba(30,64,175,0.3) 0%, transparent 40%),
-linear-gradient(135deg,#0f172a,#1e293b);
-overflow:hidden;
+radial-gradient(circle at top, rgba(59,130,246,0.12), transparent 30%),
+linear-gradient(180deg, #0b1120 0%, #111827 100%);
+padding:24px;
 }
 
-/* subtle math watermark */
 body::before{
-content:"μ  σ  ∑  ∫  π  λ  P(X)  E(X)  Var(X)  CLT  MLE  H₀  H₁";
-position:absolute;
-font-size:120px;
-color:rgba(255,255,255,0.03);
-top:20%;
-left:10%;
-white-space:nowrap;
-transform:rotate(-15deg);
+content:"";
+position:fixed;
+inset:0;
+background:
+linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+background-size:36px 36px;
+mask-image:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0));
 pointer-events:none;
 }
 
-/* Sidebar */
-.sidebar{
-width:260px;
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(20px);
-padding:30px 20px;
+.app-shell{
+max-width:980px;
+height:calc(100vh - 48px);
+margin:0 auto;
 display:flex;
 flex-direction:column;
+gap:16px;
+}
+
+.card{
+background:var(--panel);
+border:1px solid var(--border);
+border-radius:22px;
+backdrop-filter:blur(18px);
+box-shadow:var(--shadow);
+}
+
+.top-bar{
+display:flex;
+align-items:center;
 justify-content:space-between;
-border-right:1px solid var(--border);
+gap:16px;
+padding:18px 22px;
 }
 
 .brand{
 display:flex;
-align-items:center;
-gap:12px;
-margin-bottom:40px;
-}
-
-.logo{
-width:44px;height:44px;
-background:linear-gradient(135deg,var(--primary),var(--accent));
-border-radius:12px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:800;
-}
-
-.menu-item{
-padding:12px 14px;
-border-radius:12px;
-cursor:pointer;
-margin-bottom:8px;
-color:var(--muted);
-transition:.3s;
-}
-
-.menu-item:hover{
-background:rgba(59,130,246,0.15);
-color:white;
-}
-
-.menu-item.active{
-background:linear-gradient(90deg,var(--primary),var(--accent));
-color:white;
-font-weight:600;
-}
-
-/* Main */
-.main{
-flex:1;
-padding:40px;
-display:flex;
 flex-direction:column;
-position:relative;
+gap:4px;
 }
 
-.header{
-text-align:center;
-margin-bottom:30px;
-}
-
-.header h2{
-font-size:26px;
+.brand h1{
+font-size:20px;
 font-weight:700;
+letter-spacing:-0.02em;
 }
 
-.header p{
-color:var(--muted);
-margin-top:8px;
-}
-
-/* Services */
-.services{
-background:var(--card);
-backdrop-filter:blur(20px);
-border:1px solid var(--border);
-border-radius:20px;
-padding:20px;
-margin-bottom:20px;
-box-shadow:var(--shadow);
-}
-
-.pills{
-display:flex;
-flex-wrap:wrap;
-gap:12px;
-margin-top:15px;
-}
-
-.pill{
-padding:10px 18px;
-border-radius:999px;
-background:rgba(255,255,255,0.1);
-cursor:pointer;
+.brand p{
 font-size:13px;
-font-weight:600;
-transition:.3s;
+color:var(--muted);
 }
 
-.pill:hover{
-background:linear-gradient(90deg,var(--primary),var(--accent));
-}
-
-/* Chat */
-.chat-window{
-flex:1;
-background:rgba(255,255,255,0.05);
-border-radius:20px;
-padding:25px;
-overflow-y:auto;
-border:1px solid var(--border);
-backdrop-filter:blur(20px);
-box-shadow:var(--shadow);
-}
-
-.msg{
-max-width:75%;
-padding:14px 16px;
-border-radius:16px;
-margin-bottom:18px;
-font-size:14px;
-line-height:1.6;
-animation:fadeIn .3s ease-in;
-}
-
-.msg.user{
-background:linear-gradient(90deg,var(--primary),var(--accent));
-margin-left:auto;
-}
-
-.msg.bot{
-background:rgba(255,255,255,0.12);
-border:1px solid var(--border);
-}
-
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
-}
-
-/* Input */
-.input-bar{
-position:fixed;
-bottom:25px;
-left:50%;
-transform:translateX(-50%);
-width:720px;
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(20px);
-border:1px solid var(--border);
-border-radius:999px;
-padding:12px 18px;
+.mode-group{
 display:flex;
-gap:12px;
-box-shadow:var(--shadow);
+align-items:center;
+gap:10px;
 }
 
-.input-bar input{
-flex:1;
-border:none;
-background:transparent;
+.mode-group label{
+font-size:13px;
+color:var(--muted);
+}
+
+.mode-group select,
+.composer input[type="text"],
+.upload-button{
+height:48px;
+border-radius:16px;
+border:1px solid var(--border);
+background:var(--panel-soft);
+color:var(--text);
+}
+
+.mode-group select{
+min-width:170px;
+padding:0 14px;
 outline:none;
-color:white;
+}
+
+.composer-card{
+padding:18px 22px;
+}
+
+.composer{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.composer input[type="text"]{
+flex:1;
+padding:0 18px;
+outline:none;
 font-size:15px;
 }
 
-.input-bar button{
-background:linear-gradient(90deg,var(--primary),var(--accent));
-color:white;
-border:none;
-padding:10px 24px;
-border-radius:999px;
-font-weight:600;
-cursor:pointer;
-transition:.3s;
+.composer input[type="text"]::placeholder{
+color:var(--muted);
 }
 
-.input-bar button:hover{
-opacity:.85;
+.upload-wrap{
+position:relative;
+}
+
+.upload-wrap input[type="file"]{
+position:absolute;
+inset:0;
+opacity:0;
+cursor:pointer;
+}
+
+.upload-button{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:0 16px;
+white-space:nowrap;
+cursor:pointer;
+font-size:14px;
+}
+
+.primary-button{
+height:48px;
+border:none;
+border-radius:16px;
+padding:0 22px;
+background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+color:white;
+font-size:14px;
+font-weight:600;
+cursor:pointer;
+}
+
+.upload-button:hover,
+.mode-group select:hover,
+.composer input[type="text"]:focus{
+border-color:rgba(96,165,250,0.42);
+}
+
+.primary-button:hover{
+filter:brightness(1.05);
+}
+
+.helper-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+margin-top:12px;
+font-size:13px;
+color:var(--muted);
+}
+
+.compare-toggle{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.compare-toggle input{
+accent-color:var(--accent);
+width:16px;
+height:16px;
+}
+
+.chat-card{
+flex:1;
+display:flex;
+flex-direction:column;
+min-height:0;
+padding:18px;
+}
+
+.chat-header{
+padding:4px 6px 16px 6px;
+border-bottom:1px solid var(--border);
+margin-bottom:16px;
+}
+
+.chat-header h2{
+font-size:15px;
+font-weight:600;
+}
+
+.chat-header p{
+margin-top:6px;
+font-size:13px;
+color:var(--muted);
+}
+
+.chat-window{
+flex:1;
+min-height:0;
+overflow-y:auto;
+padding-right:6px;
+scroll-behavior:smooth;
+}
+
+.chat-window::-webkit-scrollbar{
+width:10px;
+}
+
+.chat-window::-webkit-scrollbar-thumb{
+background:rgba(148,163,184,0.18);
+border-radius:999px;
+}
+
+.empty-state{
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+color:var(--muted);
+padding:24px;
+}
+
+.empty-state div{
+max-width:420px;
+line-height:1.7;
+}
+
+.msg{
+max-width:78%;
+padding:16px 18px;
+border-radius:20px;
+margin-bottom:16px;
+font-size:14px;
+line-height:1.8;
+animation:fadeIn .25s ease;
+}
+
+.msg.user{
+margin-left:auto;
+background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+color:white;
+}
+
+.msg.bot{
+background:rgba(255,255,255,0.05);
+border:1px solid var(--border);
+}
+
+.msg h1,.msg h2,.msg h3,.msg h4{
+margin:0 0 10px 0;
+line-height:1.35;
+}
+
+.msg p{
+margin:0 0 12px 0;
+}
+
+.msg ul,.msg ol{
+margin:0 0 14px 22px;
+}
+
+.msg li{
+margin-bottom:8px;
+}
+
+.msg hr{
+border:none;
+border-top:1px solid rgba(255,255,255,0.12);
+margin:16px 0;
+}
+
+.msg strong{
+font-weight:700;
+}
+
+.compare-grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:14px;
+margin-top:14px;
+}
+
+.compare-panel{
+background:rgba(255,255,255,0.04);
+border:1px solid var(--border);
+border-radius:18px;
+padding:16px;
+min-width:0;
+display:flex;
+flex-direction:column;
+max-height:70vh;
+}
+
+.compare-panel h3{
+font-size:14px;
+margin-bottom:10px;
+}
+
+.compare-subtitle{
+font-size:12px;
+color:var(--muted);
+margin-bottom:12px;
+line-height:1.5;
+}
+
+.compare-content{
+overflow:auto;
+padding-right:6px;
+}
+
+.eval-card{
+margin:4px 0 14px 0;
+padding:14px;
+border:1px solid var(--border);
+border-radius:16px;
+background:rgba(255,255,255,0.04);
+}
+
+.eval-title{
+font-size:12px;
+font-weight:700;
+letter-spacing:0.04em;
+text-transform:uppercase;
+color:#bfdbfe;
+margin-bottom:10px;
+}
+
+.eval-grid{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+
+.eval-metric{
+padding:10px 12px;
+border-radius:12px;
+background:rgba(255,255,255,0.03);
+border:1px solid rgba(148,163,184,0.12);
+}
+
+.eval-metric span{
+display:block;
+font-size:12px;
+color:var(--muted);
+margin-bottom:4px;
+line-height:1.4;
+}
+
+.eval-metric strong{
+font-size:15px;
+font-weight:700;
+color:var(--text);
+}
+
+.compare-content::-webkit-scrollbar{
+width:8px;
+}
+
+.compare-content::-webkit-scrollbar-thumb{
+background:rgba(148,163,184,0.18);
+border-radius:999px;
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(8px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+@media (max-width: 720px){
+body{
+padding:14px;
+}
+
+.app-shell{
+height:calc(100vh - 28px);
+gap:12px;
+}
+
+.top-bar,
+.composer-card,
+.chat-card{
+padding-left:16px;
+padding-right:16px;
+}
+
+.top-bar,
+.composer,
+.helper-row{
+flex-direction:column;
+align-items:stretch;
+}
+
+.mode-group{
+justify-content:space-between;
+}
+
+.mode-group select,
+.primary-button,
+.upload-button{
+width:100%;
+}
+
+.msg{
+max-width:90%;
+}
+
+.compare-grid{
+grid-template-columns:1fr;
+}
+
+.eval-grid{
+grid-template-columns:1fr;
+}
 }
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-<div>
+<div class="app-shell">
+<div class="card top-bar">
 <div class="brand">
-<div class="logo">Σ</div>
-<h3>YourStatGuide</h3>
+<h1>StatGPT</h1>
+<p>AI tutor for mathematical statistics</p>
 </div>
 
-<div class="menu-item active">📘 Chapters</div>
-<div class="menu-item">📊 Concepts</div>
-<div class="menu-item">🧮 Practice</div>
-<div class="menu-item">📈 Visualizations</div>
-<div class="menu-item">📝 Notes</div>
-</div>
-
-<div style="font-size:13px;color:var(--muted)">
-AI Companion for Mathematical Statistics
-</div>
-</div>
-
-<div class="main">
-<div class="header">
-<h2>Welcome to YourStatGuide</h2>
-<p>Explore CLT, MLE, Sufficiency, Hypothesis Testing & more.</p>
-</div>
-
-<div class="services">
-<strong>Statistics Services</strong>
-<div class="pills">
-<div class="pill">Explain a Concept</div>
-<div class="pill">Solve a Problem</div>
-<div class="pill">Generate Practice Question</div>
-<div class="pill">Show Derivation</div>
-<div class="pill">Quick Revision</div>
+<div class="mode-group">
+<label for="mode">Mode</label>
+<select id="mode">
+<option value="explain">Explain</option>
+<option value="solve">Solve</option>
+<option value="practice">Practice</option>
+<option value="revise">Revise</option>
+</select>
 </div>
 </div>
 
-<div class="chat-window" id="chatWindow"></div>
+<div class="card composer-card">
+<div class="composer">
+<input id="input" type="text" placeholder="Ask a concept, solve a question, or continue the conversation...">
+
+<label class="upload-wrap">
+<span class="upload-button">Upload Image</span>
+<input id="imageInput" type="file" accept=".png,.jpg,.jpeg">
+</label>
+
+<button class="primary-button" onclick="send()">Ask</button>
 </div>
 
-<div class="input-bar">
-<input id="input" placeholder="Ask about Central Limit Theorem, MLE, etc...">
-<button onclick="send()">Ask</button>
+<div class="helper-row">
+<span id="fileLabel">No image selected</span>
+<label class="compare-toggle" for="compareMode">
+<input id="compareMode" type="checkbox">
+<span>Compare RAG vs Non-RAG</span>
+</label>
+</div>
+</div>
+
+<div class="card chat-card">
+<div class="chat-header">
+<h2>Conversation</h2>
+<p>Ask naturally. Follow-up prompts and math responses render here.</p>
+</div>
+
+<div class="chat-window" id="chatWindow">
+<div class="empty-state" id="emptyState">
+<div>
+Start with a concept like <strong>Central Limit Theorem</strong>, a numeric problem, or upload a question image.
+</div>
+</div>
+</div>
+</div>
 </div>
 
 <script>
 const chatWindow=document.getElementById("chatWindow");
+const emptyState=document.getElementById("emptyState");
 const input=document.getElementById("input");
+const mode=document.getElementById("mode");
+const imageInput=document.getElementById("imageInput");
+const fileLabel=document.getElementById("fileLabel");
+const compareMode=document.getElementById("compareMode");
+const sessionKey="statgpt-session-id";
+let sessionId=localStorage.getItem(sessionKey)||crypto.randomUUID();
+localStorage.setItem(sessionKey,sessionId);
+
+function hideEmptyState(){
+if(emptyState){
+emptyState.style.display="none";
+}
+}
+
+function normalizeMathText(text){
+if(!text)return "";
+
+let normalized=text;
+
+normalized=normalized.replace(/\$\$([\s\S]*?)\$\$/g,(match,expr)=>`$$${expr.trim()}$$`);
+normalized=normalized.replace(/(^|[^\$])\$([^\$\n]+?)\$(?!\$)/g,(match,prefix,expr)=>`${prefix}\\(${expr.trim()}\\)`);
+
+return normalized;
+}
 
 function append(role,text){
+hideEmptyState();
 const msg=document.createElement("div");
 msg.className="msg "+role;
-msg.innerHTML=marked.parse(text);
+msg.innerHTML=marked.parse(normalizeMathText(text));
 chatWindow.appendChild(msg);
 chatWindow.scrollTop=chatWindow.scrollHeight;
-if(window.MathJax){MathJax.typesetPromise();}
+if(window.MathJax){MathJax.typesetPromise([msg]);}
+}
+
+function showThinking(text){
+hideEmptyState();
+const thinking=document.createElement("div");
+thinking.className="msg bot";
+thinking.innerHTML=`<em>${text}</em>`;
+chatWindow.appendChild(thinking);
+chatWindow.scrollTop=chatWindow.scrollHeight;
+return thinking;
+}
+
+function buildRequestMode(){
+return compareMode.checked?"compare":"with_rag";
+}
+
+function formatMetric(value){
+const numeric=Number(value);
+return Number.isFinite(numeric)?numeric.toFixed(3):"0.000";
+}
+
+function renderEvaluation(evaluation){
+if(!evaluation)return "";
+
+return `
+<div class="eval-card">
+<div class="eval-title">RAG Evaluation</div>
+<div class="eval-grid">
+<div class="eval-metric">
+<span>Faithfulness</span>
+<strong>${formatMetric(evaluation.faithfulness)}</strong>
+</div>
+<div class="eval-metric">
+<span>Answer Relevancy</span>
+<strong>${formatMetric(evaluation.answer_relevancy)}</strong>
+</div>
+<div class="eval-metric">
+<span>Context Precision</span>
+<strong>${formatMetric(evaluation.context_precision)}</strong>
+</div>
+<div class="eval-metric">
+<span>Context Recall</span>
+<strong>${formatMetric(evaluation.context_recall)}</strong>
+</div>
+</div>
+</div>`;
+}
+
+function appendCompare(question,withRag,withoutRag,evaluation){
+hideEmptyState();
+const msg=document.createElement("div");
+const evaluationHtml=renderEvaluation(evaluation);
+msg.className="msg bot";
+msg.innerHTML=marked.parse(`
+## Compare RAG vs Non-RAG
+
+### Question
+
+${question}
+`) + `
+${evaluationHtml}
+<div class="compare-grid">
+<div class="compare-panel">
+<h3>With RAG</h3>
+<div class="compare-subtitle">Grounded in retrieved textbook context from your vector database.</div>
+<div class="compare-content">${marked.parse(normalizeMathText(withRag))}</div>
+</div>
+<div class="compare-panel">
+<h3>Without RAG</h3>
+<div class="compare-subtitle">Direct LLM answer without using retrieved book context.</div>
+<div class="compare-content">${marked.parse(normalizeMathText(withoutRag))}</div>
+</div>
+</div>`;
+chatWindow.appendChild(msg);
+chatWindow.scrollTop=chatWindow.scrollHeight;
+if(window.MathJax){MathJax.typesetPromise([msg]);}
 }
 
 async function send(){
@@ -298,23 +643,31 @@ if(!text)return;
 append("user",text);
 input.value="";
 
-const thinking=document.createElement("div");
-thinking.className="msg bot";
-thinking.innerHTML="<em>Analyzing statistical context...</em>";
-chatWindow.appendChild(thinking);
-chatWindow.scrollTop=chatWindow.scrollHeight;
+const thinking=showThinking("Thinking...");
 
 try{
 const res=await fetch("/chat",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({message:text})
+body:JSON.stringify({
+message:text,
+mode:buildRequestMode(),
+tutor_mode:mode.value,
+session_id:sessionId
+})
 });
 const data=await res.json();
 thinking.remove();
+sessionId=data.session_id||sessionId;
+localStorage.setItem(sessionKey,sessionId);
+
+if(data.mode==="compare"){
+appendCompare(data.question,data.with_rag,data.without_rag,data.evaluation);
+return;
+}
 
 let i=0;
-const full=data.reply;
+const full=normalizeMathText(data.reply);
 const bot=document.createElement("div");
 bot.className="msg bot";
 chatWindow.appendChild(bot);
@@ -324,10 +677,10 @@ bot.innerText=full.slice(0,i);
 chatWindow.scrollTop=chatWindow.scrollHeight;
 if(i<full.length){
 i++;
-setTimeout(type,15);
+setTimeout(type,12);
 }else{
 bot.innerHTML=marked.parse(full);
-if(window.MathJax){MathJax.typesetPromise();}
+if(window.MathJax){MathJax.typesetPromise([bot]);}
 }
 }
 type();
@@ -337,6 +690,65 @@ thinking.remove();
 append("bot","**Error:** Backend not reachable.");
 }
 }
+
+async function sendImage(){
+const file=imageInput.files[0];
+if(!file){
+append("bot","**Error:** Please choose a PNG or JPG image first.");
+return;
+}
+
+append("user",`Uploaded image question: **${file.name}**`);
+const thinking=showThinking("Thinking...");
+
+try{
+const formData=new FormData();
+formData.append("image",file);
+formData.append("mode",buildRequestMode());
+formData.append("tutor_mode",mode.value);
+formData.append("session_id",sessionId);
+
+const res=await fetch("/chat/image",{
+method:"POST",
+body:formData
+});
+const data=await res.json();
+thinking.remove();
+
+if(!res.ok){
+append("bot",data.reply||"**Error:** Image processing failed.");
+return;
+}
+
+sessionId=data.session_id||sessionId;
+localStorage.setItem(sessionKey,sessionId);
+if(data.mode==="compare"){
+appendCompare(
+`Extracted question: ${normalizeMathText(data.extracted_text)}`,
+data.with_rag,
+data.without_rag,
+data.evaluation
+);
+imageInput.value="";
+fileLabel.innerText="No image selected";
+return;
+}
+append("bot",`### Extracted Question\n\n${normalizeMathText(data.extracted_text)}\n\n---\n\n${data.reply}`);
+imageInput.value="";
+fileLabel.innerText="No image selected";
+}catch(e){
+thinking.remove();
+append("bot","**Error:** Backend not reachable.");
+}
+}
+
+imageInput.addEventListener("change",()=>{
+const file=imageInput.files[0];
+fileLabel.innerText=file?file.name:"No image selected";
+if(file){
+sendImage();
+}
+});
 
 input.addEventListener("keydown",e=>{
 if(e.key==="Enter")send();

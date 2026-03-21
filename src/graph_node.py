@@ -11,11 +11,9 @@ class RetrieverNode:
     def run(self, state):
         print("---RETRIEVE---")
         question = state['question']
-
-
         docs = self.retriever.invoke(question)
-       
         state['documents'] = docs
+        state.setdefault('rewrite_attempts', 0)
 
         return state
     
@@ -35,21 +33,19 @@ class GraderNode:
         docs = state['documents']
 
         filtered = []
-        transform_query_required = "No"
+        rewrite_attempts = state.get('rewrite_attempts', 0)
 
         for doc in docs:
             grade = self.retrieval_grader.grade(doc.page_content, question)
-            # grade = score.binary_score
 
             if grade == "yes":
                 print("---GRADE: DOCUMENT RELEVANT---")
                 filtered.append(doc)
             else:
                 print("---GRADE: DOCUMENT NOT RELEVANT---")
-                transform_query_required = "Yes"
 
         state['documents'] = filtered
-        state['transform_query'] = transform_query_required
+        state['transform_query'] = "Yes" if not filtered and rewrite_attempts < 1 else "No"
 
         return state
 
@@ -76,19 +72,29 @@ class GeneratorNode:
     Node that generates final answer using RAG chain.
     """
 
-    def __init__(self, rag_chain):
-        self.rag_chain = rag_chain
+    def __init__(self, ai_service):
+        self.ai_service = ai_service
 
     def run(self, state):
         print("---GENERATE---")
 
-        question = state['question']
+        original_question = state.get('original_question', state['question'])
+        resolved_question = state.get('resolved_question', state['question'])
         documents = state['documents']
-
-        # Format documents internally
-        context = "\n\n".join(doc.page_content for doc in documents)
-
-        output = self.rag_chain.invoke({"context": context, "question": question})
+        mode = state.get('mode', 'explain')
+        history = state.get('history', [])
+        follow_up_instruction = state.get(
+            'follow_up_instruction',
+            'No special follow-up handling required.',
+        )
+        output = self.ai_service.generate_response(
+            original_question=original_question,
+            resolved_question=resolved_question,
+            documents=documents,
+            mode=mode,
+            history=history,
+            follow_up_instruction=follow_up_instruction,
+        )
         state['generation'] = output
 
         return state
@@ -107,5 +113,6 @@ class QueryTransformNode:
 
         new_q = self.question_rewriter.rewrite(state['question'])
         state['question'] = new_q
+        state['rewrite_attempts'] = state.get('rewrite_attempts', 0) + 1
 
         return state

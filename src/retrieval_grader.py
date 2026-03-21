@@ -1,5 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_groq import ChatGroq
+from langchain_core.output_parsers import StrOutputParser
 from pydantic import BaseModel, Field
 
 
@@ -19,7 +19,7 @@ class RetrievalGrader:
     def __init__(self, llm_model):
         self.llm = llm_model
         self.prompt = self._build_prompt()
-        self.chain = self.prompt | self.llm
+        self.chain = self.prompt | self.llm | StrOutputParser()
 
 
     def _build_prompt(self):
@@ -27,7 +27,7 @@ class RetrievalGrader:
         system_msg = """
         You are a grader assessing the relevance of a retrieved document to a user question.
         If the document contains keywords OR semantic meaning related to the question,
-        respond 'yes'. Otherwise respond 'no'.
+        respond with exactly one word: yes or no.
         """
 
         return ChatPromptTemplate.from_messages(
@@ -46,7 +46,9 @@ class RetrievalGrader:
         Grade a single retrieved document.
         Returns GradeDocuments(binary_score='yes'/'no')
         """
-        return self.chain.invoke({"document": document, "question": question})
+        response = self.chain.invoke({"document": document, "question": question})
+        normalized = response.strip().lower()
+        return "yes" if normalized.startswith("yes") else "no"
 
     def grade_all(self, documents, question: str):
         """

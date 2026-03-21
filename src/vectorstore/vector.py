@@ -36,7 +36,7 @@ class TextChunker:
     
 class HFEmbedding:
     def __init__(self, model_name = "BAAI/bge-large-en-v1.5", device = "cpu"):
-        self.model_name = os.getenv("EMBEDDING_MODEL")
+        self.model_name = os.getenv("EMBEDDING_MODEL") or model_name
         self.device = device
 
     def load(self):
@@ -71,21 +71,26 @@ class FAISSStore:
     def load(self):
           if not os.path.exists(self.index_path):
               raise FileNotFoundError(f"No FAISS index found in {self.index_path}")
-          
+
+          allow_unsafe_deser = (
+              os.getenv("ALLOW_DANGEROUS_FAISS_DESERIALIZATION", "false").strip().lower()
+              in {"1", "true", "yes"}
+          )
+
           self.vectorstore = FAISS.load_local(
               folder_path=self.index_path,
               embeddings=self.embedding_model,
-              allow_dangerous_deserialization=True
+              allow_dangerous_deserialization=allow_unsafe_deser
           )
 
           print(f"✔ FAISS index loaded from: {self.index_path}")
           return self.vectorstore
     
-    def get_retriever(self, vectordb):
+    def get_retriever(self, vectordb, search_kwargs=None):
         """Return retriever object."""
         if vectordb is None:
             raise ValueError("Vectorstore not initialized")
-        return vectordb.as_retriever()
+        return vectordb.as_retriever(search_kwargs=search_kwargs or {})
     
 
         
