@@ -3,757 +3,564 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StatGPT</title>
+<title>YourStatGuide • AI Statistics Companion</title>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 window.MathJax = {
 tex: {
-inlineMath: [['\\(','\\)']],
-displayMath: [['$$','$$'], ['\\[','\\]']]
-},
-svg: {
-fontCache: 'global'
+inlineMath: [['$', '$'], ['\\(', '\\)']],
+displayMath: [['$$', '$$'], ['\\[', '\\]']],
+processEscapes: true
 }
 };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
-:root{
---bg:#0b1120;
---panel:rgba(15,23,42,0.78);
---panel-soft:rgba(30,41,59,0.72);
---border:rgba(148,163,184,0.18);
---text:#e5eefc;
---muted:#94a3b8;
---accent:#3b82f6;
---accent-strong:#2563eb;
---shadow:0 20px 50px rgba(2,6,23,0.45);
-}
-
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-font-family:Inter,sans-serif;
-}
-
-body{
-min-height:100vh;
-color:var(--text);
-background:
-radial-gradient(circle at top, rgba(59,130,246,0.12), transparent 30%),
-linear-gradient(180deg, #0b1120 0%, #111827 100%);
-padding:24px;
-}
-
-body::before{
-content:"";
-position:fixed;
-inset:0;
-background:
-linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-background-size:36px 36px;
-mask-image:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0));
-pointer-events:none;
-}
-
-.app-shell{
-max-width:980px;
-height:calc(100vh - 48px);
-margin:0 auto;
-display:flex;
-flex-direction:column;
-gap:16px;
-}
-
-.card{
-background:var(--panel);
-border:1px solid var(--border);
-border-radius:22px;
-backdrop-filter:blur(18px);
-box-shadow:var(--shadow);
-}
-
-.top-bar{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:16px;
-padding:18px 22px;
-}
-
-.brand{
-display:flex;
-flex-direction:column;
-gap:4px;
-}
-
-.brand h1{
-font-size:20px;
-font-weight:700;
-letter-spacing:-0.02em;
-}
-
-.brand p{
-font-size:13px;
-color:var(--muted);
-}
-
-.mode-group{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.mode-group label{
-font-size:13px;
-color:var(--muted);
-}
-
-.mode-group select,
-.composer input[type="text"],
-.upload-button{
-height:48px;
-border-radius:16px;
-border:1px solid var(--border);
-background:var(--panel-soft);
-color:var(--text);
-}
-
-.mode-group select{
-min-width:170px;
-padding:0 14px;
-outline:none;
-}
-
-.composer-card{
-padding:18px 22px;
-}
-
-.composer{
-display:flex;
-align-items:center;
-gap:12px;
-}
-
-.composer input[type="text"]{
-flex:1;
-padding:0 18px;
-outline:none;
-font-size:15px;
-}
-
-.composer input[type="text"]::placeholder{
-color:var(--muted);
-}
-
-.upload-wrap{
-position:relative;
-}
-
-.upload-wrap input[type="file"]{
-position:absolute;
-inset:0;
-opacity:0;
-cursor:pointer;
-}
-
-.upload-button{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-padding:0 16px;
-white-space:nowrap;
-cursor:pointer;
-font-size:14px;
-}
-
-.primary-button{
-height:48px;
-border:none;
-border-radius:16px;
-padding:0 22px;
-background:linear-gradient(135deg,var(--accent),var(--accent-strong));
-color:white;
-font-size:14px;
-font-weight:600;
-cursor:pointer;
-}
-
-.upload-button:hover,
-.mode-group select:hover,
-.composer input[type="text"]:focus{
-border-color:rgba(96,165,250,0.42);
-}
-
-.primary-button:hover{
-filter:brightness(1.05);
-}
-
-.helper-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:12px;
-margin-top:12px;
-font-size:13px;
-color:var(--muted);
-}
-
-.compare-toggle{
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.compare-toggle input{
-accent-color:var(--accent);
-width:16px;
-height:16px;
-}
-
-.chat-card{
-flex:1;
-display:flex;
-flex-direction:column;
-min-height:0;
-padding:18px;
-}
-
-.chat-header{
-padding:4px 6px 16px 6px;
-border-bottom:1px solid var(--border);
-margin-bottom:16px;
-}
-
-.chat-header h2{
-font-size:15px;
-font-weight:600;
-}
-
-.chat-header p{
-margin-top:6px;
-font-size:13px;
-color:var(--muted);
-}
-
-.chat-window{
-flex:1;
-min-height:0;
-overflow-y:auto;
-padding-right:6px;
-scroll-behavior:smooth;
-}
-
-.chat-window::-webkit-scrollbar{
-width:10px;
-}
-
-.chat-window::-webkit-scrollbar-thumb{
-background:rgba(148,163,184,0.18);
-border-radius:999px;
-}
-
-.empty-state{
-height:100%;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-color:var(--muted);
-padding:24px;
-}
-
-.empty-state div{
-max-width:420px;
-line-height:1.7;
-}
-
-.msg{
-max-width:78%;
-padding:16px 18px;
-border-radius:20px;
-margin-bottom:16px;
-font-size:14px;
-line-height:1.8;
-animation:fadeIn .25s ease;
-}
-
-.msg.user{
-margin-left:auto;
-background:linear-gradient(135deg,var(--accent),var(--accent-strong));
-color:white;
-}
-
-.msg.bot{
-background:rgba(255,255,255,0.05);
-border:1px solid var(--border);
-}
-
-.msg h1,.msg h2,.msg h3,.msg h4{
-margin:0 0 10px 0;
-line-height:1.35;
-}
-
-.msg p{
-margin:0 0 12px 0;
-}
-
-.msg ul,.msg ol{
-margin:0 0 14px 22px;
-}
-
-.msg li{
-margin-bottom:8px;
-}
-
-.msg hr{
-border:none;
-border-top:1px solid rgba(255,255,255,0.12);
-margin:16px 0;
-}
-
-.msg strong{
-font-weight:700;
-}
-
-.compare-grid{
-display:grid;
-grid-template-columns:repeat(2,minmax(0,1fr));
-gap:14px;
-margin-top:14px;
-}
-
-.compare-panel{
-background:rgba(255,255,255,0.04);
-border:1px solid var(--border);
-border-radius:18px;
-padding:16px;
-min-width:0;
-display:flex;
-flex-direction:column;
-max-height:70vh;
-}
-
-.compare-panel h3{
-font-size:14px;
-margin-bottom:10px;
-}
-
-.compare-subtitle{
-font-size:12px;
-color:var(--muted);
-margin-bottom:12px;
-line-height:1.5;
-}
-
-.compare-content{
-overflow:auto;
-padding-right:6px;
-}
-
-.eval-card{
-margin:4px 0 14px 0;
-padding:14px;
-border:1px solid var(--border);
-border-radius:16px;
-background:rgba(255,255,255,0.04);
-}
-
-.eval-title{
-font-size:12px;
-font-weight:700;
-letter-spacing:0.04em;
-text-transform:uppercase;
-color:#bfdbfe;
-margin-bottom:10px;
-}
-
-.eval-grid{
-display:grid;
-grid-template-columns:repeat(2,minmax(0,1fr));
-gap:10px;
-}
-
-.eval-metric{
-padding:10px 12px;
-border-radius:12px;
-background:rgba(255,255,255,0.03);
-border:1px solid rgba(148,163,184,0.12);
-}
-
-.eval-metric span{
-display:block;
-font-size:12px;
-color:var(--muted);
-margin-bottom:4px;
-line-height:1.4;
-}
-
-.eval-metric strong{
-font-size:15px;
-font-weight:700;
-color:var(--text);
-}
-
-.compare-content::-webkit-scrollbar{
-width:8px;
-}
-
-.compare-content::-webkit-scrollbar-thumb{
-background:rgba(148,163,184,0.18);
-border-radius:999px;
-}
-
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(8px);}
-to{opacity:1;transform:translateY(0);}
-}
-
-@media (max-width: 720px){
-body{
-padding:14px;
-}
-
-.app-shell{
-height:calc(100vh - 28px);
-gap:12px;
-}
-
-.top-bar,
-.composer-card,
-.chat-card{
-padding-left:16px;
-padding-right:16px;
-}
-
-.top-bar,
-.composer,
-.helper-row{
-flex-direction:column;
-align-items:stretch;
-}
-
-.mode-group{
-justify-content:space-between;
-}
-
-.mode-group select,
-.primary-button,
-.upload-button{
-width:100%;
-}
-
-.msg{
-max-width:90%;
-}
-
-.compare-grid{
-grid-template-columns:1fr;
-}
-
-.eval-grid{
-grid-template-columns:1fr;
-}
-}
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 
 <body>
 
-<div class="app-shell">
-<div class="card top-bar">
-<div class="brand">
-<h1>StatGPT</h1>
-<p>AI tutor for mathematical statistics</p>
-</div>
-
-<div class="mode-group">
-<label for="mode">Mode</label>
-<select id="mode">
-<option value="explain">Explain</option>
-<option value="solve">Solve</option>
-<option value="practice">Practice</option>
-<option value="revise">Revise</option>
-</select>
-</div>
-</div>
-
-<div class="card composer-card">
-<div class="composer">
-<input id="input" type="text" placeholder="Ask a concept, solve a question, or continue the conversation...">
-
-<label class="upload-wrap">
-<span class="upload-button">Upload Image</span>
-<input id="imageInput" type="file" accept=".png,.jpg,.jpeg">
-</label>
-
-<button class="primary-button" onclick="send()">Ask</button>
-</div>
-
-<div class="helper-row">
-<span id="fileLabel">No image selected</span>
-<label class="compare-toggle" for="compareMode">
-<input id="compareMode" type="checkbox">
-<span>Compare RAG vs Non-RAG</span>
-</label>
-</div>
-</div>
-
-<div class="card chat-card">
-<div class="chat-header">
-<h2>Conversation</h2>
-<p>Ask naturally. Follow-up prompts and math responses render here.</p>
-</div>
-
-<div class="chat-window" id="chatWindow">
-<div class="empty-state" id="emptyState">
+<div class="sidebar">
 <div>
-Start with a concept like <strong>Central Limit Theorem</strong>, a numeric problem, or upload a question image.
+<div class="brand">
+<div class="logo">Σ</div>
+<h3>YourStatGuide</h3>
+</div>
+
+{% if current_user %}
+<div class="sidebar-user">
+<span>Signed in as</span>
+<strong>{{ current_user }}</strong>
+</div>
+{% endif %}
+
+
+<div class="menu-item active" data-view="ask-ai">🤖 Ask AI</div>
+<div class="menu-item" data-view="concepts">📊 Concepts</div>
+<div class="menu-item" data-view="practice">🧮 Practice</div>
+<div class="menu-item" data-view="visualizations">📈 Visualizations</div>
+<div class="menu-item" data-view="notes">📝 Notes</div>
+</div>
+
+<div class="sidebar-footer">
+<div style="font-size:13px;color:var(--muted)">
+AI Companion for Mathematical Statistics
+</div>
+<form action="{{ url_for('logout') }}" method="post" class="logout-form">
+<button type="submit" class="logout-btn">Log Out</button>
+</form>
+</div>
+</div>
+
+<div class="main">
+<div class="view active" id="ask-ai-view">
+<div class="header">
+<h2>Welcome to YourStatGuide</h2>
+<p>Explore CLT, MLE, Sufficiency, Hypothesis Testing & more.</p>
+</div>
+
+<div class="services">
+<strong>Statistics Services</strong>
+<div class="pills">
+<div class="pill">Explain a Concept</div>
+<div class="pill">Solve a Problem</div>
+<div class="pill">Generate Practice Question</div>
+<div class="pill">Show Derivation</div>
+<div class="pill">Quick Revision</div>
+</div>
+</div>
+
+<div class="chat-window" id="chatWindow"></div>
+
+<div class="video-suggestions" id="askAiVideoSuggestions">
+<h4>Related Videos</h4>
+<div class="video-grid"></div>
+</div>
+
+<div class="input-bar">
+<input id="input" placeholder="Ask about Central Limit Theorem, MLE, etc...">
+<button onclick="send()">Ask</button>
+</div>
+</div>
+
+<div class="view" id="concepts-view">
+<div class="header">
+<h2>Core Statistics Concepts</h2>
+<p>Browse major topics and jump into concept-wise analysis.</p>
+</div>
+
+<div class="concept-search-wrap">
+<input id="conceptSearch" class="concept-search" placeholder="Search concepts like regression, ANOVA, Bayesian..." type="text">
+</div>
+
+<div class="concept-shell">
+<div class="concept-browser active" id="conceptBrowser">
+<div class="concept-grid" id="conceptGrid">
+<article class="concept-card" data-tags="descriptive statistics mean median mode variance summary data skewness kurtosis quartiles measures of central tendency dispersion">
+<div class="concept-visual visual-blue">DS<span class="concept-pattern">MEAN . MEDIAN</span></div>
+<h3>Descriptive Statistics</h3>
+<p>Summarize data using center, spread, frequency, skewness, and simple comparative measures.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="inferential statistics population sample inference significance level standard error estimator consistency efficiency">
+<div class="concept-visual visual-orange">IS<span class="concept-pattern">CI . ESTIMATE</span></div>
+<h3>Inferential Statistics</h3>
+<p>Draw conclusions about populations from samples using estimation, testing, and uncertainty quantification.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card is-featured" data-tags="probability distributions normal binomial poisson random variable density expectation variance pmf pdf cdf continuous discrete gaussian" data-concept="Probability Distributions" data-action="Start Analysis">
+<div class="concept-visual visual-red">PD<span class="concept-pattern">PDF . PMF</span></div>
+<h3>Probability Distributions</h3>
+<p>Understand how random variables behave through normal, binomial, Poisson, exponential, and related models.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="probability theory axioms events conditional probability independence bayes theorem sample space">
+<div class="concept-visual visual-blue">PT<span class="concept-pattern">P(A|B)</span></div>
+<h3>Probability Theory</h3>
+<p>Build the foundation of statistical reasoning through events, conditional probability, independence, and Bayes rule.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="sampling methods random stratified cluster systematic survey">
+<div class="concept-visual visual-green">SM<span class="concept-pattern">RANDOM . STRATA</span></div>
+<h3>Sampling Methods</h3>
+<p>Compare random, stratified, cluster, and systematic approaches for collecting representative data.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="regression analysis linear model prediction slope intercept residuals least squares multiple regression">
+<div class="concept-visual visual-yellow">RA<span class="concept-pattern">y = a + bx</span></div>
+<h3>Regression Analysis</h3>
+<p>Model relationships between variables for prediction, interpretation, goodness of fit, and residual study.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="hypothesis testing null alternative p value significance test z test t test chi square type 1 type 2 power">
+<div class="concept-visual visual-blue">HT<span class="concept-pattern">H0 vs H1</span></div>
+<h3>Hypothesis Testing</h3>
+<p>Evaluate claims with null and alternative hypotheses, p-values, significance levels, and decision rules.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="estimation theory point estimation interval estimation confidence intervals mle maximum likelihood method of moments unbiasedness">
+<div class="concept-visual visual-orange">ET<span class="concept-pattern">MLE . CI</span></div>
+<h3>Estimation Theory</h3>
+<p>Estimate unknown parameters using point and interval methods, likelihood principles, and estimator properties.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="data visualization chart plot histogram scatter boxplot dashboard">
+<div class="concept-visual visual-orange">DV<span class="concept-pattern">CHART . TREND</span></div>
+<h3>Data Visualization</h3>
+<p>Present patterns clearly using plots, comparisons, distribution views, and communicative visual storytelling.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="anova analysis of variance f test group means">
+<div class="concept-visual visual-red">AN<span class="concept-pattern">F - TEST</span></div>
+<h3>ANOVA</h3>
+<p>Test whether multiple group means differ significantly by comparing between-group and within-group variance.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="correlation association covariance pearson spearman dependence relationship scatter">
+<div class="concept-visual visual-green">CA<span class="concept-pattern">r . cov</span></div>
+<h3>Correlation and Association</h3>
+<p>Measure how variables move together using covariance, correlation coefficients, and rank-based association.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="time series analysis trend seasonality autocorrelation forecasting">
+<div class="concept-visual visual-green">TS<span class="concept-pattern">TREND . SEASON</span></div>
+<h3>Time Series Analysis</h3>
+<p>Study trend, seasonality, lag relationships, smoothing, and forecasting for time-dependent data.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="bayesian statistics prior posterior likelihood bayes inference">
+<div class="concept-visual visual-yellow">BS<span class="concept-pattern">PRIOR . POSTERIOR</span></div>
+<h3>Bayesian Statistics</h3>
+<p>Update belief with evidence using priors, likelihoods, posteriors, and probabilistic interpretation.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="non parametric statistics rank test sign test wilcoxon mann whitney distribution free">
+<div class="concept-visual visual-red">NP<span class="concept-pattern">RANK TEST</span></div>
+<h3>Non-Parametric Statistics</h3>
+<p>Analyze data without strong distribution assumptions using rank tests, median-based methods, and robust procedures.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="multivariate statistics pca covariance matrix multiple variables dimensionality">
+<div class="concept-visual visual-blue">MV<span class="concept-pattern">PCA . MATRIX</span></div>
+<h3>Multivariate Statistics</h3>
+<p>Study multiple variables together through covariance structure, dimensionality reduction, and joint interpretation.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+
+<article class="concept-card" data-tags="stochastic processes markov chains random walk poisson process states transitions">
+<div class="concept-visual visual-orange">SP<span class="concept-pattern">MARKOV</span></div>
+<h3>Stochastic Processes</h3>
+<p>Model evolving random systems such as Markov chains, random walks, and process-based uncertainty over time.</p>
+<button class="concept-cta">Start Analysis</button>
+</article>
+</div>
+</div>
+
+<div class="concept-detail" id="conceptDetail">
+<button class="concept-back" id="conceptBack">← Back to Concepts</button>
+<div class="concept-detail-title">
+<h3 id="conceptDetailTitle">Probability Distributions</h3>
+<p id="conceptDetailSubtitle" style="color:var(--muted);margin-top:8px;">Explore concept resources, then choose a subtopic for explanation.</p>
+</div>
+<div class="video-suggestions" id="conceptVideoSuggestions">
+<h4 id="conceptVideoSuggestionsTitle">Related Videos</h4>
+<div class="video-grid" id="conceptVideoGrid"></div>
+<div class="subtopic-strip" id="subtopicStrip"></div>
+</div>
+
+<div class="concept-output" id="conceptOutput">
+<h4 id="conceptOutputTitle">Concept Explanation</h4>
+<div class="concept-answer" id="conceptAnswer"></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="view" id="practice-view">
+<div class="header">
+<h2>Topic Practice</h2>
+<p>Choose a statistics topic, watch practice videos, and solve questions in a separate practice chatbot.</p>
+</div>
+
+<div class="concept-search-wrap">
+<input id="practiceSearch" class="concept-search" placeholder="Search univariate, estimation, hypothesis..." type="text">
+</div>
+
+<div class="practice-shell">
+<div class="practice-browser active" id="practiceBrowser">
+<div class="practice-grid" id="practiceGrid">
+<article class="practice-card" data-exam="Descriptive Statistics and Probability" data-tags="descriptive statistics probability sample population data mean median mode variance bayes probability practice">
+<div class="practice-preview practice-jam"></div>
+<h3>Descriptive Statistics and Probability</h3>
+<p>Practice questions on data types, central tendency, dispersion, skewness, kurtosis, and probability basics.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Univariate Distributions" data-tags="univariate distributions random variables cdf pmf pdf expectation moments binomial poisson normal practice">
+<div class="practice-preview practice-gate"></div>
+<h3>Univariate Distributions</h3>
+<p>Practice questions on random variables, cdf, pmf, pdf, moments, and standard univariate distributions.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Multivariate Distributions" data-tags="multivariate distributions joint marginal conditional random vectors multinomial bivariate normal practice">
+<div class="practice-preview practice-isi"></div>
+<h3>Multivariate Distributions</h3>
+<p>Practice questions on joint, marginal, and conditional distributions of random vectors.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Limit Theorems" data-tags="limit theorems convergence probability mean square almost sure weak law strong law clt practice">
+<div class="practice-preview practice-cmi"></div>
+<h3>Limit Theorems</h3>
+<p>Practice questions on convergence concepts, laws of large numbers, and the central limit theorem.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Sampling Distributions" data-tags="sampling distributions order statistics chi square t f distribution practice">
+<div class="practice-preview practice-cuet"></div>
+<h3>Sampling Distributions</h3>
+<p>Practice questions on order statistics and central chi-square, t, and F distributions.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Estimation" data-tags="estimation sufficiency complete statistic consistency efficiency umvue cramer rao mle confidence intervals practice">
+<div class="practice-preview practice-mstat"></div>
+<h3>Estimation</h3>
+<p>Practice questions on sufficiency, UMVUE, method of moments, MLE, and confidence intervals.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Testing of Hypotheses" data-tags="testing of hypotheses critical region size power neyman pearson likelihood ratio test practice">
+<div class="practice-preview practice-jam"></div>
+<h3>Testing of Hypotheses</h3>
+<p>Practice questions on critical regions, power, Neyman-Pearson lemma, and likelihood ratio tests.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Nonparametric Methods" data-tags="nonparametric methods runs test ks sign test mann whitney practice">
+<div class="practice-preview practice-gate"></div>
+<h3>Nonparametric Methods</h3>
+<p>Practice questions on runs test, empirical distribution, sign tests, and Mann-Whitney test.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+<article class="practice-card" data-exam="Stochastic Processes" data-tags="stochastic processes markov chain transition matrix chapman kolmogorov poisson process practice">
+<div class="practice-preview practice-isi"></div>
+<h3>Stochastic Processes</h3>
+<p>Practice questions on Markov chains, Chapman-Kolmogorov equations, and Poisson processes.</p>
+<button class="concept-cta">Open Practice</button>
+</article>
+
+</div>
+</div>
+
+<div class="practice-detail" id="practiceDetail">
+<button class="practice-back" id="practiceBack">Back to Practice</button>
+<div class="concept-detail-title">
+<h3 id="practiceTitle">Descriptive Statistics and Probability</h3>
+<p id="practiceSubtitle" style="color:var(--muted);margin-top:8px;">Topic practice videos and chatbot support.</p>
+</div>
+<div class="video-suggestions active" id="practiceVideoSuggestions">
+<h4 id="practiceVideoTitle">Related Videos</h4>
+<div class="video-grid" id="practiceVideoGrid"></div>
+</div>
+<div class="practice-chat-shell">
+<div class="services">
+<strong>Practice Prompts</strong>
+<div class="practice-prompt-strip" id="practicePromptStrip"></div>
+</div>
+<div class="practice-chat-window" id="practiceChatWindow"></div>
+<div class="practice-input-bar">
+<input id="practiceInput" type="text" placeholder="Ask for a question, ask for hints, or request a full solution...">
+<button id="practiceSend">Ask</button>
 </div>
 </div>
 </div>
 </div>
 </div>
 
-<script>
-const chatWindow=document.getElementById("chatWindow");
-const emptyState=document.getElementById("emptyState");
-const input=document.getElementById("input");
-const mode=document.getElementById("mode");
-const imageInput=document.getElementById("imageInput");
-const fileLabel=document.getElementById("fileLabel");
-const compareMode=document.getElementById("compareMode");
-const sessionKey="statgpt-session-id";
-let sessionId=localStorage.getItem(sessionKey)||crypto.randomUUID();
-localStorage.setItem(sessionKey,sessionId);
-
-function hideEmptyState(){
-if(emptyState){
-emptyState.style.display="none";
-}
-}
-
-function normalizeMathText(text){
-if(!text)return "";
-
-let normalized=text;
-
-normalized=normalized.replace(/\$\$([\s\S]*?)\$\$/g,(match,expr)=>`$$${expr.trim()}$$`);
-normalized=normalized.replace(/(^|[^\$])\$([^\$\n]+?)\$(?!\$)/g,(match,prefix,expr)=>`${prefix}\\(${expr.trim()}\\)`);
-
-return normalized;
-}
-
-function append(role,text){
-hideEmptyState();
-const msg=document.createElement("div");
-msg.className="msg "+role;
-msg.innerHTML=marked.parse(normalizeMathText(text));
-chatWindow.appendChild(msg);
-chatWindow.scrollTop=chatWindow.scrollHeight;
-if(window.MathJax){MathJax.typesetPromise([msg]);}
-}
-
-function showThinking(text){
-hideEmptyState();
-const thinking=document.createElement("div");
-thinking.className="msg bot";
-thinking.innerHTML=`<em>${text}</em>`;
-chatWindow.appendChild(thinking);
-chatWindow.scrollTop=chatWindow.scrollHeight;
-return thinking;
-}
-
-function buildRequestMode(){
-return compareMode.checked?"compare":"with_rag";
-}
-
-function formatMetric(value){
-const numeric=Number(value);
-return Number.isFinite(numeric)?numeric.toFixed(3):"0.000";
-}
-
-function renderEvaluation(evaluation){
-if(!evaluation)return "";
-
-return `
-<div class="eval-card">
-<div class="eval-title">RAG Evaluation</div>
-<div class="eval-grid">
-<div class="eval-metric">
-<span>Faithfulness</span>
-<strong>${formatMetric(evaluation.faithfulness)}</strong>
+<div class="view" id="notes-view">
+<div class="header">
+<h2>Notes Library</h2>
+<p>Choose a section, pick a subtopic, download a note PDF, watch related videos, and ask follow-up questions.</p>
 </div>
-<div class="eval-metric">
-<span>Answer Relevancy</span>
-<strong>${formatMetric(evaluation.answer_relevancy)}</strong>
+
+<div class="concept-search-wrap">
+<input id="notesSearch" class="concept-search" placeholder="Search estimation, distributions, hypothesis..." type="text">
 </div>
-<div class="eval-metric">
-<span>Context Precision</span>
-<strong>${formatMetric(evaluation.context_precision)}</strong>
-</div>
-<div class="eval-metric">
-<span>Context Recall</span>
-<strong>${formatMetric(evaluation.context_recall)}</strong>
+
+<div class="notes-shell">
+<div class="notes-browser active" id="notesBrowser">
+<div class="practice-grid" id="notesGrid">
+<article class="practice-card notes-card" data-section="Descriptive Statistics and Probability" data-tags="descriptive statistics probability mean variance skewness bayes section 4">
+<div class="practice-preview practice-jam"></div>
+<h3>Descriptive Statistics and Probability</h3>
+<p>Section 4 notes on descriptive statistics, probability basics, Bayes theorem, and independence.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Univariate Distributions" data-tags="univariate distributions pmf pdf cdf random variables section 5">
+<div class="practice-preview practice-gate"></div>
+<h3>Univariate Distributions</h3>
+<p>Section 5 notes on random variables, pmf, pdf, cdf, moments, mgf, and standard distributions.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Multivariate Distributions" data-tags="multivariate distributions joint marginal conditional section 6">
+<div class="practice-preview practice-isi"></div>
+<h3>Multivariate Distributions</h3>
+<p>Section 6 notes on random vectors, joint distributions, covariance, correlation, and conditional moments.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Limit Theorems" data-tags="limit theorems clt lln convergence section 7">
+<div class="practice-preview practice-cmi"></div>
+<h3>Limit Theorems</h3>
+<p>Section 7 notes on convergence, laws of large numbers, and the central limit theorem.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Sampling Distributions" data-tags="sampling distributions order statistics chi square t f section 8">
+<div class="practice-preview practice-cuet"></div>
+<h3>Sampling Distributions</h3>
+<p>Section 8 notes on order statistics and central chi-square, t, and F distributions.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Estimation" data-tags="estimation umvue cramer rao mle confidence intervals section 9">
+<div class="practice-preview practice-mstat"></div>
+<h3>Estimation</h3>
+<p>Section 9 notes on sufficiency, UMVUE, Cramer-Rao, MLE, and confidence intervals.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Testing of Hypotheses" data-tags="testing of hypotheses neyman pearson likelihood ratio section 10">
+<div class="practice-preview practice-jam"></div>
+<h3>Testing of Hypotheses</h3>
+<p>Section 10 notes on critical regions, power, Neyman-Pearson, and likelihood ratio tests.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Nonparametric Methods" data-tags="nonparametric methods runs test ks mann whitney section 11">
+<div class="practice-preview practice-gate"></div>
+<h3>Nonparametric Methods</h3>
+<p>Section 11 notes on runs test, empirical distribution, KS test, sign tests, and Mann-Whitney.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
+
+<article class="practice-card notes-card" data-section="Stochastic Processes" data-tags="stochastic processes markov chain poisson process section 12">
+<div class="practice-preview practice-isi"></div>
+<h3>Stochastic Processes</h3>
+<p>Section 12 notes on discrete-time Markov chains, transition matrices, and Poisson processes.</p>
+<button class="concept-cta">Open Notes</button>
+</article>
 </div>
 </div>
-</div>`;
-}
 
-function appendCompare(question,withRag,withoutRag,evaluation){
-hideEmptyState();
-const msg=document.createElement("div");
-const evaluationHtml=renderEvaluation(evaluation);
-msg.className="msg bot";
-msg.innerHTML=marked.parse(`
-## Compare RAG vs Non-RAG
-
-### Question
-
-${question}
-`) + `
-${evaluationHtml}
-<div class="compare-grid">
-<div class="compare-panel">
-<h3>With RAG</h3>
-<div class="compare-subtitle">Grounded in retrieved textbook context from your vector database.</div>
-<div class="compare-content">${marked.parse(normalizeMathText(withRag))}</div>
+<div class="notes-detail" id="notesDetail">
+<button class="practice-back" id="notesBack">Back to Notes</button>
+<div class="concept-detail-title">
+<h3 id="notesTitle">Descriptive Statistics and Probability</h3>
+<p id="notesSubtitle" style="color:var(--muted);margin-top:8px;">Pick a subtopic to download notes, watch videos, and ask questions.</p>
 </div>
-<div class="compare-panel">
-<h3>Without RAG</h3>
-<div class="compare-subtitle">Direct LLM answer without using retrieved book context.</div>
-<div class="compare-content">${marked.parse(normalizeMathText(withoutRag))}</div>
+<div class="services">
+<strong>Subtopics</strong>
+<div class="subtopic-strip active" id="notesSubtopicStrip"></div>
 </div>
-</div>`;
-chatWindow.appendChild(msg);
-chatWindow.scrollTop=chatWindow.scrollHeight;
-if(window.MathJax){MathJax.typesetPromise([msg]);}
-}
+<div class="services">
+<strong>Note Download</strong>
+<div class="notes-download-row">
+<div class="video-meta" id="notesDownloadStatus">Select a subtopic to generate the note preview and PDF.</div>
+<button class="notes-download-btn" id="notesDownloadBtn" type="button" style="display:none;">Download PDF</button>
+</div>
+</div>
+<div class="notes-render" id="notesRender"></div>
+<div class="video-suggestions active">
+<h4 id="notesVideoTitle">Related Videos</h4>
+<div class="video-grid" id="notesVideoGrid"></div>
+</div>
+<div class="practice-chat-shell">
+<div class="practice-chat-window" id="notesChatWindow"></div>
+<div class="practice-input-bar">
+<input id="notesInput" type="text" placeholder="Ask a follow-up about the selected subtopic...">
+<button id="notesSend">Ask</button>
+</div>
+</div>
+</div>
+</div>
+</div>
 
-async function send(){
-const text=input.value.trim();
-if(!text)return;
+<div class="view" id="visualizations-view">
+<div class="header">
+<h2>Statistical Visualizations</h2>
+<p>Use plots to understand distributions, relationships, comparisons, and inference visually.</p>
+</div>
 
-append("user",text);
-input.value="";
+<div class="concept-search-wrap">
+<input id="vizSearch" class="concept-search" placeholder="Search histogram, normal curve, regression, ANOVA..." type="text">
+</div>
 
-const thinking=showThinking("Thinking...");
+<div class="viz-shell">
+<div class="viz-browser active" id="vizBrowser">
+<div class="viz-grid" id="vizGrid">
+<article class="viz-card" data-viz="Histogram" data-tags="histogram distribution frequency bins shape spread">
+<div class="viz-preview shape-bars"></div>
+<h3>Histogram</h3>
+<p>See how values are distributed across intervals and quickly spot skewness, spread, and clusters.</p>
+<button class="viz-cta">Open Visualization</button>
+</article>
 
-try{
-const res=await fetch("/chat",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-message:text,
-mode:buildRequestMode(),
-tutor_mode:mode.value,
-session_id:sessionId
-})
-});
-const data=await res.json();
-thinking.remove();
-sessionId=data.session_id||sessionId;
-localStorage.setItem(sessionKey,sessionId);
+<article class="viz-card" data-viz="Box Plot" data-tags="box plot quartiles iqr median outliers">
+<div class="viz-preview shape-box"></div>
+<h3>Box Plot</h3>
+<p>Summarize quartiles, spread, central tendency, and outliers in one compact statistical view.</p>
+<button class="viz-cta">Open Visualization</button>
+</article>
 
-if(data.mode==="compare"){
-appendCompare(data.question,data.with_rag,data.without_rag,data.evaluation);
-return;
-}
+<article class="viz-card" data-viz="Scatter Plot" data-tags="scatter plot correlation association relationship points">
+<div class="viz-preview shape-scatter"></div>
+<h3>Scatter Plot</h3>
+<p>Visualize relationships between two variables and inspect patterns, trend, and correlation strength.</p>
+<button class="viz-cta">Open Visualization</button>
+</article>
 
-let i=0;
-const full=normalizeMathText(data.reply);
-const bot=document.createElement("div");
-bot.className="msg bot";
-chatWindow.appendChild(bot);
+<article class="viz-card" data-viz="Normal Curve" data-tags="normal curve gaussian bell curve distribution">
+<div class="viz-preview shape-curve"></div>
+<h3>Normal Curve</h3>
+<p>Understand symmetry, mean-centered spread, and why the bell curve appears across statistics.</p>
+<button class="viz-cta">Open Visualization</button>
+</article>
 
-function type(){
-bot.innerText=full.slice(0,i);
-chatWindow.scrollTop=chatWindow.scrollHeight;
-if(i<full.length){
-i++;
-setTimeout(type,12);
-}else{
-bot.innerHTML=marked.parse(full);
-if(window.MathJax){MathJax.typesetPromise([bot]);}
-}
-}
-type();
+<article class="viz-card" data-viz="Bar Chart" data-tags="bar chart categories comparison values counts">
+<div class="viz-preview shape-bars"></div>
+<h3>Bar Chart</h3>
+<p>Compare category values clearly and highlight differences across named groups or labels.</p>
+<button class="viz-cta">Open Visualization</button>
+</article>
 
-}catch(e){
-thinking.remove();
-append("bot","**Error:** Backend not reachable.");
-}
-}
+<article class="viz-card" data-viz="Pie Chart" data-tags="pie chart proportions percentage categories slices">
+<div class="viz-preview shape-pie"></div>
+<h3>Pie Chart</h3>
+<p>Show how a whole is divided across categories using slices and relative proportions.</p>
+<button class="viz-cta">Open Visualization</button>
+</article>
 
-async function sendImage(){
-const file=imageInput.files[0];
-if(!file){
-append("bot","**Error:** Please choose a PNG or JPG image first.");
-return;
-}
+<article class="viz-card" data-viz="Pareto Distribution" data-tags="pareto distribution 80 20 power law tail wealth risk">
+<div class="viz-preview shape-pareto"></div>
+<h3>Pareto Distribution</h3>
+<p>Explore heavy-tail behavior and the classic 80/20 style concentration pattern in data.</p>
+<button class="viz-cta">Open Visualization</button>
+</article>
+</div>
+</div>
 
-append("user",`Uploaded image question: **${file.name}**`);
-const thinking=showThinking("Thinking...");
+<div class="viz-detail" id="vizDetail">
+<button class="viz-back" id="vizBack">← Back to Visualizations</button>
+<div class="concept-detail-title">
+<h3 id="vizDetailTitle">Histogram</h3>
+<p id="vizDetailSubtitle" style="color:var(--muted);margin-top:8px;">Interpret the structure, purpose, and common mistakes of this visualization.</p>
+</div>
+<div class="viz-hero" id="vizHero"></div>
+<div class="viz-summary" id="vizSummary">
+<div class="viz-section">
+<h4>Key Stats</h4>
+<div class="viz-stat-grid" id="vizStatGrid"></div>
+</div>
+<div class="viz-section">
+<h4>Quick Interpretation</h4>
+<ul class="viz-list viz-insights" id="vizInsights"></ul>
+</div>
+</div>
+<div class="viz-sections">
+<div class="viz-section">
+<h4>Interactive Controls</h4>
+<form class="viz-form" id="vizForm"></form>
+</div>
+<div class="viz-section">
+<h4>What It Shows</h4>
+<p id="vizWhatItShows"></p>
+</div>
+<div class="viz-section">
+<h4>When To Use It</h4>
+<p id="vizWhenToUse"></p>
+</div>
+<div class="viz-section">
+<h4>How To Interpret It</h4>
+<ul class="viz-list" id="vizInterpret"></ul>
+</div>
+<div class="viz-section">
+<h4>Common Mistakes</h4>
+<ul class="viz-list" id="vizMistakes"></ul>
+</div>
+</div>
+</div>
+</div>
+</div>
 
-try{
-const formData=new FormData();
-formData.append("image",file);
-formData.append("mode",buildRequestMode());
-formData.append("tutor_mode",mode.value);
-formData.append("session_id",sessionId);
-
-const res=await fetch("/chat/image",{
-method:"POST",
-body:formData
-});
-const data=await res.json();
-thinking.remove();
-
-if(!res.ok){
-append("bot",data.reply||"**Error:** Image processing failed.");
-return;
-}
-
-sessionId=data.session_id||sessionId;
-localStorage.setItem(sessionKey,sessionId);
-if(data.mode==="compare"){
-appendCompare(
-`Extracted question: ${normalizeMathText(data.extracted_text)}`,
-data.with_rag,
-data.without_rag,
-data.evaluation
-);
-imageInput.value="";
-fileLabel.innerText="No image selected";
-return;
-}
-append("bot",`### Extracted Question\n\n${normalizeMathText(data.extracted_text)}\n\n---\n\n${data.reply}`);
-imageInput.value="";
-fileLabel.innerText="No image selected";
-}catch(e){
-thinking.remove();
-append("bot","**Error:** Backend not reachable.");
-}
-}
-
-imageInput.addEventListener("change",()=>{
-const file=imageInput.files[0];
-fileLabel.innerText=file?file.name:"No image selected";
-if(file){
-sendImage();
-}
-});
-
-input.addEventListener("keydown",e=>{
-if(e.key==="Enter")send();
-});
-</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 </body>
 </html>
+
+
+
+

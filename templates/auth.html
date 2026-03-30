@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if auth_mode == 'signup' %}Create Account{% else %}Sign In{% endif %} | YourStatGuide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-body">
+<main class="auth-shell">
+<section class="auth-card">
+<a href="{{ url_for('home') }}" class="back-link">Back to landing</a>
+<span class="eyebrow">YourStatGuide Access</span>
+<h1>{% if auth_mode == 'signup' %}Create your account{% else %}Sign in to YourStatGuide{% endif %}</h1>
+<p class="auth-subtitle">
+{% if auth_mode == 'signup' %}
+Create an account to access the protected statistics workspace.
+{% else %}
+Enter your credentials to open the statistics workspace.
+{% endif %}
+</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-stack">
+{% for category, message in messages %}
+<div class="flash-message flash-{{ category }}">{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<form method="post" class="auth-form">
+{% if auth_mode == 'signup' %}
+<label>
+<span>Name</span>
+<input type="text" name="name" placeholder="Enter your name" required>
+</label>
+{% endif %}
+
+<label>
+<span>Email</span>
+<input type="email" name="email" placeholder="Enter your email" required>
+</label>
+
+<label>
+<span>Password</span>
+<input type="password" name="password" placeholder="Enter your password" required>
+</label>
+
+{% if auth_mode == 'signup' %}
+<label>
+<span>Confirm Password</span>
+<input type="password" name="confirm_password" placeholder="Confirm your password" required>
+</label>
+{% else %}
+<input type="hidden" name="next" value="{{ next_url or '' }}">
+{% endif %}
+
+<button type="submit" class="auth-submit">
+{% if auth_mode == 'signup' %}Create Account{% else %}Sign In{% endif %}
+</button>
+ </form>
+
+<div class="auth-footer-copy">
+{% if auth_mode == 'signup' %}
+Already have an account? <a href="{{ url_for('signin') }}">Sign in</a>
+{% else %}
+Need an account? <a href="{{ url_for('signup') }}">Create one</a>
+{% endif %}
+</div>
+</section>
+</main>
+</body>
+</html>

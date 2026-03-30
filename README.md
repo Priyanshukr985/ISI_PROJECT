@@ -1,194 +1,230 @@
-# 🚀 StatGuide – Self-Improving AI Tutor with Adaptive Retrieval
+# YourStatGuide
 
-StatGuide is an AI-powered tutor for Mathematical Statistics that goes beyond traditional RAG systems by **evaluating, correcting, and improving its own retrieval process**.
+YourStatGuide is an AI-powered statistics learning platform built with Flask. It is designed as a single study workspace where a user can ask statistics questions, explore concepts, practice topic-wise questions, generate notes, and create visualizations.
 
-Instead of just answering questions, the system focuses on **retrieval quality, reasoning, and answer reliability**.
+The main RAG knowledge source used in this project is:
 
----
+- `Fundamentals of Mathematical Statistics (A Modern Approach)` by S.C. Gupta and V.K. Kapoor
 
-## 🧠 What Makes It Different
+## What the project does
 
-Most AI systems:
+This project brings together multiple learning tasks in one web app:
 
-* Retrieve context → Generate answer
+- Ask AI: RAG-based statistics question answering
+- Concepts: concept-wise learning support
+- Practice: topic-wise practice support
+- Notes: note generation and PDF export
+- Visualizations: statistical plots and interpretation
+- Math Rendering: formulas rendered using MathJax
+- Authentication: sign up / sign in before using the app
 
-StatGuide:
+## Tech stack
 
-* Retrieves context
-* Evaluates relevance
-* Rewrites queries if needed
-* Dynamically switches between sources
-* Generates grounded, reliable answers
+- Frontend: HTML, CSS, JavaScript
+- Backend: Flask
+- LLM workflow: LangChain, LangGraph
+- LLM provider: Groq
+- Embeddings: HuggingFace Embeddings
+- Vector store: FAISS
+- Visualization: Matplotlib, Seaborn
+- Math rendering: MathJax
 
----
+## Repository structure
 
-## 💥 Key Features
-
-* 🔁 **Self-Correcting RAG Pipeline**
-  Retrieval → grading → query rewrite → re-retrieval → answer generation
-
-* 🔀 **Adaptive Routing System**
-  Automatically chooses between:
-
-  * Vector search (FAISS)
-  * Web search
-  * Hybrid retrieval
-
-* 📊 **RAG vs Non-RAG Comparison Mode**
-  Compares answers and evaluates using RAGAS metrics
-
-* 🧮 **Deterministic Solver**
-  Solves numerical/statistical problems without relying only on LLM
-
-* 🧠 **Session Memory**
-  Supports follow-up queries with context awareness
-
-* 🖼️ **OCR Input Support**
-  Accepts image-based questions
-
----
-
-## 🏗️ Architecture
-
-```id="d3f9p3"
-User Query
-   ↓
-Router (RAG / Web / Hybrid)
-   ↓
-Retriever (FAISS + BM25 + Web)
-   ↓
-Document Grader (LLM)
-   ↓
-Query Rewriter (if needed)
-   ↓
-Generator (LLM)
-   ↓
-Final Answer
+```text
+ISI_Project/
+|-- app.py
+|-- requirements.txt
+|-- README.md
+|-- .env.example
+|-- report_template.tex
+|-- src/
+|   |-- llm_model.py
+|   |-- graph_builder.py
+|   |-- graph_node.py
+|   |-- rag_generator.py
+|   |-- retrieval_grader.py
+|   |-- question_rewriter.py
+|   |-- video_search.py
+|   `-- vectorstore/
+|       |-- vector.py
+|       `-- index_pipeline.py
+|-- templates/
+|-- static/
+|-- faiss_index/        # generated locally
+|-- data/               # generated locally
+`-- Stat_Book.pdf       # kept locally
 ```
 
----
+## Before you run it
 
-## ⚙️ Tech Stack
+This project depends on a few local files and API keys.
 
-* Flask
-* LangChain + LangGraph
-* Groq LLM
-* FAISS (Vector DB)
-* HuggingFace Embeddings
-* RAGAS (evaluation)
-* Tesseract OCR
+You will need:
 
----
+- Python 3.10 or newer
+- a `.env` file with valid API keys
+- `Stat_Book.pdf` in the project root
+- a FAISS index inside `faiss_index/`
 
-## 🔬 Engineering Highlights
+## Setup
 
-* Modular service-based architecture
-* Hybrid retrieval (semantic + keyword)
-* LLM-based document relevance grading
-* Query rewriting for retrieval improvement
-* Dynamic routing between knowledge sources
-* Environment-based secure configuration
+### 1. Clone the repository
 
----
-
-## ⚠️ Challenges Solved
-
-* Poor retrieval in RAG → solved using grading + rewriting
-* LLM hallucination → reduced via grounded context
-* Numerical inaccuracies → solved with deterministic solver
-* Evaluation issues → improved using RAGAS
-
----
-
-## 🛡️ Security & Reliability
-
-* Safe FAISS loading (env-controlled)
-* No hardcoded debug mode
-* Environment validation at startup
-* Structured logging
-
----
-
-## ⚠️ Limitations
-
-* Limited automated tests
-* Evaluation can be further improved
-* Web routing can be optimized
-
----
-
-## 🚀 Setup
-
-### 1. Create Virtual Environment
-
-```powershell id="g5eqpj"
-py -m venv statenv
-.\statenv\Scripts\activate
+```bash
+git clone <your-repo-url>
+cd ISI_Project
 ```
 
----
+### 2. Create and activate a virtual environment
 
-### 2. Install Dependencies
+Windows PowerShell:
 
-```powershell id="n8qgqg"
-pip install flask python-dotenv langchain langgraph langchain-groq langchain-community langchain-huggingface langchain-text-splitters faiss-cpu pypdf requests ragas datasets pillow pytesseract rank-bm25
+```powershell
+python -m venv statenv
+.\statenv\Scripts\Activate.ps1
 ```
 
----
+### 3. Install dependencies
 
-### 3. Configure `.env`
+```powershell
+pip install -r requirements.txt
+```
 
-```env id="s3lf42"
-GROQ_API_KEY=your_key
-LLM_MODEL=your_model
+### 4. Create the environment file
+
+Copy `.env.example` to `.env`:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then fill the values in `.env`.
+
+Required variables:
+
+- `GROQ_API_KEY`
+- `EMBEDDING_MODEL`
+- `LLM_MODEL`
+- `FLASK_SECRET_KEY`
+- `YOUTUBE`
+
+Recommended values:
+
+```env
 EMBEDDING_MODEL=BAAI/bge-large-en-v1.5
-TESSERACT_CMD=C:\path\to\tesseract.exe
-FLASK_DEBUG=false
-ALLOW_DANGEROUS_FAISS_DESERIALIZATION=false
+LLM_MODEL=llama-3.1-8b-instant
 ```
 
----
+## Required local files
 
-### 4. Build Index
+### 1. Source book PDF
 
-```python id="g9e3lo"
+Place the source PDF in the project root with this exact name:
+
+```text
+Stat_Book.pdf
+```
+
+This file is used as the main knowledge source for the RAG system.
+
+### 2. FAISS index
+
+The app loads the vector database from:
+
+```text
+faiss_index/
+```
+
+If this folder is missing, you must build the index first.
+
+## How to build the FAISS index
+
+Run this in Python:
+
+```python
 from src.vectorstore.index_pipeline import IndexBuilder
+
 IndexBuilder("Stat_Book.pdf").build_index()
 ```
 
----
+What this does:
 
-### 5. Run App
+- loads the PDF
+- splits it into chunks
+- generates embeddings
+- builds the FAISS index
+- saves the index locally in `faiss_index/`
 
-```powershell id="fd7s2a"
+## How to run the project
+
+After setup is complete, start the Flask app:
+
+```powershell
 python app.py
 ```
 
-Open:
+Then open this in your browser:
 
-```id="v87q2k"
-http://localhost:5000
+```text
+http://127.0.0.1:5000
 ```
 
----
+## How the app works
 
-## 💡 Future Work
+### Landing and authentication
 
-* Personalized learning paths
-* Weak topic detection
-* Multi-subject expansion
-* Better evaluation metrics
-* Full test coverage
+- open the landing page
+- create an account or sign in
+- enter the protected workspace
 
----
+### Inside the app
 
-## 🧠 Key Insight
+You can use:
 
-> Most RAG systems fail due to poor retrieval.
-> StatGuide actively detects and corrects retrieval failures.
+- Ask AI
+- Concepts
+- Practice
+- Visualizations
+- Notes
 
----
+## Notes for anyone cloning the project
 
-## 👨‍💻 Author
+- `.env` is intentionally not committed
+- `faiss_index/` is ignored in `.gitignore`
+- `data/` is generated locally
+- `Stat_Book.pdf` is not committed
 
-Priyanshu Kumar
+So a fresh clone will not run unless:
+
+1. you create a valid `.env`
+2. you add `Stat_Book.pdf`
+3. you generate the FAISS index
+
+## Current limitations
+
+- authentication is local JSON-based
+- the app expects the source PDF locally
+- first run may take time if the embedding model is not cached
+- HuggingFace model download may require stable internet on first setup
+
+## Main files
+
+- `app.py` - main Flask app and routes
+- `src/vectorstore/vector.py` - PDF loading, chunking, embeddings, FAISS
+- `src/vectorstore/index_pipeline.py` - FAISS index building
+- `src/graph_builder.py` - LangGraph workflow
+- `src/graph_node.py` - retrieval, grading, rewrite, generation nodes
+- `src/rag_generator.py` - final answer generation prompt
+- `src/retrieval_grader.py` - relevance grading
+- `src/question_rewriter.py` - query rewriting
+- `src/video_search.py` - YouTube search integration
+
+## Authors
+
+- Priyanshu Kumar - Indian Institute of Technology Patna
+- Sahil - Meghnad Saha Institute of Technology
+
+Mentor:
+
+- Bidisha Dobe

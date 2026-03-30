@@ -1,6 +1,6 @@
 from langgraph.graph import END, START, StateGraph
 
-from typing import Any, List
+from typing import List
 from typing_extensions import TypedDict
 
 
@@ -16,16 +16,10 @@ class GraphState(TypedDict):
     """
 
     question: str
-    original_question: str
-    resolved_question: str
-    mode: str
-    history: List[Any]
-    follow_up_instruction: str
-    is_follow_up: bool
     transform_query: str
     generation: str
-    documents: List[Any]
-    rewrite_attempts: int
+    documents: List[str]
+    rewrite_count: int
     
 
 class WorkflowBuilder:
@@ -64,7 +58,7 @@ class WorkflowBuilder:
             },
         )
 
-        workflow.add_edge("transform_query", "grade_documents")
+        workflow.add_edge("transform_query", "retrieve")
         workflow.add_edge("generate", END)
 
         return workflow.compile()

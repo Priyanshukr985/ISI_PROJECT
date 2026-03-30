@@ -18,8 +18,11 @@ class QuestionRewriter:
     def _build_prompt(self):
         system_msg = """
         You are a question re-writer that converts an input question
-        into a better version optimized for semantic retrieval and web search.
+        into a better version optimized for semantic retrieval.
         Understand the meaning and rewrite the question with improved clarity.
+        Correct spelling mistakes, OCR mistakes, and likely subject-specific typos.
+        Preserve the intended statistics meaning.
+        Return only the rewritten question, nothing else.
         """
 
         return ChatPromptTemplate.from_messages(

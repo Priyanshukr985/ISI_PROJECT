@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YourStatGuide | AI Statistics Learning Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body class="auth-body">
+<main class="landing-shell">
+<section class="landing-panel">
+<div class="landing-copy">
+<span class="eyebrow">AI Statistics Learning Platform</span>
+<h1>YourStatGuide</h1>
+<p class="lead">One gated workspace for RAG-based doubt solving, concept learning, practice, notes, and visualizations.</p>
+<div class="feature-grid">
+<article class="feature-card">
+<h3>Grounded Ask AI</h3>
+<p>Book-backed RAG chatbot for statistics concepts and theory questions.</p>
+</article>
+<article class="feature-card">
+<h3>Practice Workspace</h3>
+<p>Topic-wise practice, exam-ready explanations, and stepwise solutions rendered with MathJax.</p>
+</article>
+<article class="feature-card">
+<h3>Notes and Revision</h3>
+<p>Section-wise notes, embedded videos, and focused revision support for core statistics topics.</p>
+</article>
+<article class="feature-card">
+<h3>Interactive Visualizations</h3>
+<p>Generate plots and inspect interpretation, key stats, and graph behavior.</p>
+</article>
+</div>
+</div>
+<aside class="access-panel">
+<div class="access-card">
+<span class="eyebrow">Secure Access</span>
+<h2>Sign in to continue</h2>
+<p>Users need an account before they can access the app workspace and protected routes.</p>
+<div class="cta-stack">
+<a href="{{ url_for('signin') }}" class="primary-link">Sign In</a>
+<a href="{{ url_for('signup') }}" class="secondary-link">Create Account</a>
+</div>
+<div class="access-note">Authentication uses session-based access with locally stored hashed passwords.</div>
+</div>
+</aside>
+</section>
+</main>
+</body>
+</html>
