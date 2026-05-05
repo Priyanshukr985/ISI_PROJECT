@@ -222,8 +222,8 @@ So a fresh clone will not run unless:
 
 ## Authors
 
-- Priyanshu Kumar - Indian Institute of Technology Patna
-- Sahil - Meghnad Saha Institute of Technology
+- Priyanshu Kumar 
+- Sahil 
 
 Mentor:
 
